@@ -268,15 +268,19 @@ class Client(QObject):
             self.cfg.set("img2img_sampler_list", obj["samplers_img2img"])
             self.cfg.set("inpaint_sampler_list", obj["samplers_img2img"])
             self.cfg.set("txt2img_script_list", list(obj["scripts_txt2img"].keys()))
+            self.cfg.set("txt2img_alwayson_script_list", list(obj["scripts_alwayson_txt2img"].keys()))
             self.cfg.set("img2img_script_list", list(obj["scripts_img2img"].keys()))
+            self.cfg.set("img2img_alwayson_script_list", list(obj["scripts_alwayson_img2img"].keys()))
             self.cfg.set("inpaint_script_list", list(obj["scripts_img2img"].keys()))
+            self.cfg.set("inpaint_alwayson_script_list", list(obj["scripts_alwayson_img2img"].keys()))
             self.cfg.set("face_restorer_model_list", obj["face_restorers"])
             self.cfg.set("sd_model_list", obj["sd_models"])
             self.cfg.set("sd_vae_list", ["Automatic", "None"] + obj["sd_vaes"])
 
             # extension script cfg
             obj["scripts_inpaint"] = obj["scripts_img2img"]
-            for ext_type in {"scripts_txt2img", "scripts_img2img", "scripts_inpaint"}:
+            obj['scripts_alwayson_inpaint'] = obj['scripts_alwayson_img2img']
+            for ext_type in ["scripts_txt2img", "scripts_img2img", "scripts_inpaint", "scripts_alwayson_txt2img", "scripts_alwayson_img2img", "scripts_alwayson_inpaint"]:
                 metadata: Dict[str, List[dict]] = obj[ext_type]
                 for ext_name, ext_meta in metadata.items():
                     old_val = self.ext_cfg(get_ext_key(ext_type, ext_name))

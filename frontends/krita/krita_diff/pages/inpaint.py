@@ -1,8 +1,17 @@
-from krita import QHBoxLayout, QPushButton
+from krita import QHBoxLayout, QPushButton, QGroupBox, QVBoxLayout
 
 from ..script import script
-from ..widgets import QCheckBox, QComboBoxLayout, QSpinBoxLayout, TipsLayout
+from ..widgets import (
+    QCheckBox,
+    QComboBoxLayout,
+    QSpinBoxLayout,
+    TipsLayout,
+    FlowLayout,
+    CollapsibleBoxLayout,
+)
 from .img_base import SDImgPageBase
+
+from PyQt5 import QtCore
 
 
 class InpaintPage(SDImgPageBase):
@@ -63,7 +72,24 @@ class InpaintPage(SDImgPageBase):
         self.layout.addWidget(self.btn)
         self.layout.addLayout(self.tips2)
         self.layout.addLayout(self.tips)
+        for i in range(12):
+            category_box = CollapsibleBoxLayout(str(i))
+            flow = FlowLayout(parent=None)
+
+            for i in range(12):
+                self.create_button(flow)
+
+            category_box.setContentLayout(flow)
+            #    self.collapse_layout.setAlignment(QtCore.Qt.AlignTop)
+            self.layout.addLayout(category_box)
+
         self.layout.addStretch()
+
+    def create_button(self, flow):
+        btn = QPushButton()
+        btn.setFixedSize(34, 34)
+        btn.setIconSize(btn.rect().size())
+        flow.addWidget(btn)
 
     def cfg_init(self):
         super(InpaintPage, self).cfg_init()

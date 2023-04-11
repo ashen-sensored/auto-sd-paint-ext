@@ -13,7 +13,7 @@ from PIL import Image, ImageOps
 from starlette.concurrency import iterate_in_threadpool
 
 from .config import LOGGER_NAME, NAME_SCRIPT_LOOPBACK, NAME_SCRIPT_UPSCALE
-from .script_hack import get_script_info, get_scripts_metadata, process_script_args
+from .script_hack import get_script_info, get_scripts_metadata, process_script_args, get_always_on_scripts_metadata
 from .structs import (
     ConfigResponse,
     ImageResponse,
@@ -92,10 +92,12 @@ async def get_state():
             sampler.name for sampler in modules.sd_samplers.samplers_for_img2img
         ],
         "scripts_txt2img": get_scripts_metadata(False),
+        "scripts_alwayson_txt2img": get_always_on_scripts_metadata(False),
         "scripts_img2img": get_scripts_metadata(True),
+        "scripts_alwayson_img2img": get_always_on_scripts_metadata(True),
         "face_restorers": [model.name() for model in shared.face_restorers],
         "sd_models": modules.sd_models.checkpoint_tiles(),  # yes internal API has spelling error
-        "sd_vaes": ["None", "Automatic" ] + (list(modules.sd_vae.vae_dict))
+        "sd_vaes": ["None", "Automatic"] + (list(modules.sd_vae.vae_dict))
     }
 
 

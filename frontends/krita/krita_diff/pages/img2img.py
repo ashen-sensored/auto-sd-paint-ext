@@ -20,6 +20,9 @@ class Img2ImgPage(SDImgPageBase):
         self.layout.addWidget(self.btn)
         self.layout.addLayout(self.tips)
         self.layout.addStretch()
+        
+        
+
 
     def cfg_init(self):
         super(Img2ImgPage, self).cfg_init()
@@ -29,3 +32,4 @@ class Img2ImgPage(SDImgPageBase):
     def cfg_connect(self):
         super(Img2ImgPage, self).cfg_connect()
         self.btn.released.connect(lambda: script.action_img2img())
+

@@ -95,7 +95,7 @@ def get_scripts_metadata(is_img2img: bool):
         and len(img2img_script_meta) - 1 == len(runner.titles)
     ):
         return img2img_script_meta
-    elif txt2img_script_meta and len(txt2img_script_meta) - 1 == len(runner.titles):
+    elif not is_img2img and txt2img_script_meta and len(txt2img_script_meta) - 1 == len(runner.titles):
         return txt2img_script_meta
 
     # NOTE: scripts are loaded before our extension is registered so metadata should be valid
@@ -106,6 +106,40 @@ def get_scripts_metadata(is_img2img: bool):
         img2img_script_meta = metadata
     else:
         txt2img_script_meta = metadata
+    return metadata
+
+
+img2img_alwayson_script_meta = None
+txt2img_alwayson_script_meta = None
+
+def get_always_on_scripts_metadata(is_img2img: bool):
+    global txt2img_alwayson_script_meta, img2img_alwayson_script_meta
+    if is_img2img:
+        runner = modules.scripts.scripts_img2img
+    else:
+        runner = modules.scripts.scripts_txt2img
+    metadata = {}
+    if (
+        is_img2img
+        and img2img_alwayson_script_meta
+        and len(img2img_alwayson_script_meta) + 1 == len(runner.alwayson_scripts)
+    ):
+        return img2img_alwayson_script_meta
+    elif not is_img2img and txt2img_alwayson_script_meta and len(txt2img_alwayson_script_meta) + 1 == len(runner.alwayson_scripts):
+        return txt2img_alwayson_script_meta
+    with gr.Blocks(visible=False, analytics_enabled=False):
+        for script in runner.alwayson_scripts:
+            current_name = script.filename.split("stable-diffusion-webui/extensions/")[-1]
+            if current_name == 'auto-sd-paint-ext/scripts/main.py':
+                continue
+            current_name = current_name.replace('/','|').replace('.py','')
+            temp_ui_metas = inspect_ui(script, is_img2img)
+            
+            metadata[current_name] = temp_ui_metas
+    if is_img2img:
+        img2img_alwayson_script_meta = metadata
+    else:
+        txt2img_alwayson_script_meta = metadata
     return metadata
 
 

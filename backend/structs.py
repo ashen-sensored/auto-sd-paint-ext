@@ -65,8 +65,12 @@ class ConfigResponse(PluginOptions):
     """List of available samplers specifically for img2img (upstream separated them for a reason)."""
     scripts_txt2img: Dict[str, List[Dict]]
     """List of available txt2img scripts."""
+    scripts_alwayson_txt2img: Dict[str, List[Dict]]
+    """List of alwayson txt2img scripts."""
     scripts_img2img: Dict[str, List[Dict]]
     """List of available img2img scripts."""
+    scripts_alwayson_img2img: Dict[str, List[Dict]]
+    """List of alwayson img2img scripts."""
     face_restorers: List[str]
     """List of available face restorers."""
     sd_models: List[str]

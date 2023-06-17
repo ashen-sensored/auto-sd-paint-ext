@@ -51,6 +51,26 @@ def get_ext_args(ext_cfg: Config, ext_type: str, ext_name: str):
     return args
 
 
+def get_alwayson_ext_args(ext_cfg: Config, ext_type: str, ext_name_list: str):
+    """Get all args for alwayson script in positional list form."""
+    args = []
+    for ext_name in ext_name_list:
+        raw = ext_cfg(get_ext_key(ext_type, ext_name))
+        meta = []
+        try:
+            meta = json.loads(raw)
+        except json.JSONDecodeError:
+            print(f"Invalid metadata: {raw}")
+
+        for i, o in enumerate(meta):
+            typ = type(o["val"])
+            if issubclass(typ, list):
+                typ = "QStringList"
+            val = ext_cfg(get_ext_key(ext_type, ext_name, i), typ)
+            args.append(val)
+    return args
+
+
 def find_fixed_aspect_ratio(
     base_size: int, max_size: int, orig_width: int, orig_height: int
 ):

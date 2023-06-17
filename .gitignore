@@ -3,6 +3,6 @@ __pycache__
 /tmp
 /outputs
 /log
-/.idea
-/.vscode
+.idea
+.vscode
 /krita_config.yaml

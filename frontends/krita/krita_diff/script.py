@@ -140,21 +140,30 @@ class Script(QObject):
     def adjust_selection(self):
         """Adjust selection region to account for scaling and striding to prevent image stretch."""
         if self.selection is not None and self.cfg("fix_aspect_ratio", bool):
-            x, y, width, height = find_optimal_selection_region(
-                self.cfg("sd_base_size", int),
-                self.cfg("sd_max_size", int),
-                self.x,
-                self.y,
-                self.width,
-                self.height,
-                self.doc.width(),
-                self.doc.height(),
-            )
+            # x, y, width, height = find_optimal_selection_region(
+            #     self.cfg("sd_base_size", int),
+            #     self.cfg("sd_max_size", int),
+            #     self.x,
+            #     self.y,
+            #     self.width,
+            #     self.height,
+            #     self.doc.width(),
+            #     self.doc.height(),
+            # )
+            def find_next_stride(width, height):
+                stride = 8
+                width = width + stride - width % stride
+                height = height + stride - height % stride
+                return width, height
 
-            self.x = x
-            self.y = y
-            self.width = width
-            self.height = height
+
+            new_width, new_height = find_next_stride(self.width, self.height)
+            self.selection.resize(self.width, self.height)
+
+            # self.x = x
+            # self.y = y
+            self.width = new_width
+            self.height = new_height
 
     def get_selection_image(self) -> QImage:
         """QImage of selection"""

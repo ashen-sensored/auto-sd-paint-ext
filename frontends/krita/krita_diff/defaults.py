@@ -120,6 +120,7 @@ class Defaults:
         default_factory=lambda: ["blur", "preserve", "latent noise", "latent empty"]
     )
     inpaint_fill: str = "preserve"
+    inpaint_mask_blur: int = 4
     # inpaint_full_res: bool = False
     # inpaint_full_res_padding: int = 32
     inpaint_color_correct: bool = False

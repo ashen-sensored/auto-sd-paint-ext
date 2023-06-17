@@ -22,9 +22,9 @@ class InpaintPage(SDImgPageBase):
         self.layout.addLayout(self.denoising_strength_layout)
 
         self.invert_mask = QCheckBox(script.cfg, "inpaint_invert_mask", "Invert mask")
-        # self.mask_blur_layout = QSpinBoxLayout(
-        #     script.cfg, "inpaint_mask_blur", "Mask blur (px):", min=0, max=9999, step=1
-        # )
+        self.mask_blur_layout = QSpinBoxLayout(
+            script.cfg, "inpaint_mask_blur", "Mask blur (px):", min=0, max=9999, step=1
+        )
         self.inpaint_mask_weight = QSpinBoxLayout(
             script.cfg, "inpaint_mask_weight", "Mask weight:", step=0.01
         )
@@ -32,7 +32,7 @@ class InpaintPage(SDImgPageBase):
         inline1 = QHBoxLayout()
         inline1.addWidget(self.invert_mask)
         inline1.addLayout(self.inpaint_mask_weight)
-        # inline1.addLayout(self.mask_blur_layout)
+        inline1.addLayout(self.mask_blur_layout)
 
         self.fill_layout = QComboBoxLayout(
             script.cfg, "inpaint_fill_list", "inpaint_fill", label="Inpaint fill:"
@@ -93,7 +93,7 @@ class InpaintPage(SDImgPageBase):
 
     def cfg_init(self):
         super(InpaintPage, self).cfg_init()
-        # self.mask_blur_layout.cfg_init()
+        self.mask_blur_layout.cfg_init()
         self.fill_layout.cfg_init()
         self.inpaint_mask_weight.cfg_init()
         # self.full_res_padding_layout.cfg_init()
@@ -104,7 +104,7 @@ class InpaintPage(SDImgPageBase):
 
     def cfg_connect(self):
         super(InpaintPage, self).cfg_connect()
-        # self.mask_blur_layout.cfg_connect()
+        self.mask_blur_layout.cfg_connect()
         self.fill_layout.cfg_connect()
         self.inpaint_mask_weight.cfg_connect()
         # self.full_res_padding_layout.cfg_connect()

@@ -73,7 +73,7 @@ class GenerationOptions(BaseModel):
     """Native/base resolution of model used."""
     max_size: int = 768
     """Max input resolution allowed to prevent image artifacts."""
-    disable_sddebz_highres: bool = False
+    disable_sddebz_highres: bool = True
     """Disable base size/max size system above."""
     tiling: bool = False
     """Whether to generate a tileable image."""

@@ -9,11 +9,11 @@ from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse
 from modules import shared
 from modules.call_queue import wrap_gradio_gpu_call
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, ImageFilter
 from starlette.concurrency import iterate_in_threadpool
 
 from .config import LOGGER_NAME, NAME_SCRIPT_LOOPBACK, NAME_SCRIPT_UPSCALE
-from .script_hack import get_script_info, get_scripts_metadata, process_script_args
+from .script_hack import get_script_info, get_scripts_metadata, process_script_args, get_always_on_scripts_metadata
 from .structs import (
     ConfigResponse,
     ImageResponse,
@@ -92,10 +92,12 @@ async def get_state():
             sampler.name for sampler in modules.sd_samplers.samplers_for_img2img
         ],
         "scripts_txt2img": get_scripts_metadata(False),
+        "scripts_alwayson_txt2img": get_always_on_scripts_metadata(False),
         "scripts_img2img": get_scripts_metadata(True),
+        "scripts_alwayson_img2img": get_always_on_scripts_metadata(True),
         "face_restorers": [model.name() for model in shared.face_restorers],
         "sd_models": modules.sd_models.checkpoint_tiles(),  # yes internal API has spelling error
-        "sd_vaes": ["None", "Automatic" ] + (list(modules.sd_vae.vae_dict))
+        "sd_vaes": ["None", "Automatic"] + (list(modules.sd_vae.vae_dict))
     }
 
 
@@ -208,7 +210,8 @@ def f_img2img(req: Img2ImgRequest):
     prepare_backend(req)
 
     script_ind, script, meta = get_script_info(req.script, True)
-    args = process_script_args(script_ind, script, meta, req.script_args)
+    # args = process_script_args(script_ind, script, meta, req.script_args)
+    args = [script_ind] + req.script_args
 
     image = b64_to_img(req.src_img)
     mask = (
@@ -256,7 +259,7 @@ def f_img2img(req: Img2ImgRequest):
         mask,  # init_mask_inpaint
         req.steps,  # steps
         get_sampler_index(req.sampler_name),  # sampler_index
-        0,  # req.mask_blur,  # mask_blur
+        req.mask_blur,  # mask_blur
         None,  # mask_alpha (unused by us) # only used by webUI color sketch if init_img_with_mask isn't dict
         req.inpainting_fill,  # inpainting_fill
         req.restore_faces,  # restore_faces
@@ -272,10 +275,10 @@ def f_img2img(req: Img2ImgRequest):
         req.seed_resize_from_h,  # seed_resize_from_h
         req.seed_resize_from_w,  # seed_resize_from_w
         req.seed_enable_extras,  # seed_enable_extras
-        1,  # selected_scale_tab
+        0, # selected_scale_tab
         height,  # height
         width,  # width
-        1.0,  # scale_by
+        1, # scale_by
         req.resize_mode,  # resize_mode
         False,  # req.inpaint_full_res,  # inpaint_full_res
         0,  # req.inpaint_full_res_padding,  # inpaint_full_res_padding
@@ -318,6 +321,12 @@ def f_img2img(req: Img2ImgRequest):
             """Mask inpaint using original mask, including alpha."""
             r, g, b = img.split()  # img2img/inpaint gives rgb image
             a = ImageOps.invert(mask) if req.invert_mask else mask
+            if req.mask_blur > 0:
+                mask_blurred = mask.filter(ImageFilter.GaussianBlur(req.mask_blur))
+                # construct new mask with alpha > 0
+                a = mask_blurred.point(lambda p: p > 0 and 255)
+
+
             return Image.merge("RGBA", (r, g, b, a))
 
         images = [apply_mask(x) for x in images]

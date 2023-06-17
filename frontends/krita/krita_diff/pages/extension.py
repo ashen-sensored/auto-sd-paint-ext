@@ -78,9 +78,9 @@ class ExtWidget(QWidget):
                 pass # Invalid config should resolves itself on next sync.
 
 
-class ExtSectionLayout(QVBoxLayout):
+class SelectedScriptSectionLayout(QVBoxLayout):
     def __init__(self, cfg_prefix: str, *args, **kwargs):
-        super(ExtSectionLayout, self).__init__(*args, **kwargs)
+        super(SelectedScriptSectionLayout, self).__init__(*args, **kwargs)
 
         self.dropdown = QComboBoxLayout(
             script.cfg,
@@ -131,3 +131,42 @@ class ExtSectionLayout(QVBoxLayout):
         widget = self.ext_widgets.get(selected, None)
         if widget and selected != "None":
             widget.setVisible(True)
+
+class AlwaysOnScriptSectionLayout(QVBoxLayout):
+    def __init__(self, cfg_prefix: str, *args, **kwargs):
+        super(AlwaysOnScriptSectionLayout, self).__init__(*args, **kwargs)
+
+        self.ext_type = f"scripts_alwayson_{cfg_prefix}"
+        self.ext_names = partial(script.cfg, f"{cfg_prefix}_alwayson_script_list", "QStringList")
+        self.ext_widgets = {}
+
+    def _clear_ext_widgets(self):
+        """Properly delete all existing extension widgets."""
+        while len(self.ext_widgets) > 0:
+            _, widget = self.ext_widgets.popitem()
+            self.removeWidget(widget)
+            widget.setParent(None)
+            widget.deleteLater()
+
+    def _init_ext_widgets(self):
+        """Inits the UI, can be called multiple times if the ext scripts available changed."""
+        self._clear_ext_widgets()
+        for ext_name in self.ext_names():
+            widget = ExtWidget(script.ext_cfg, self.ext_type, ext_name)
+            self.addWidget(widget)
+            self.ext_widgets[ext_name] = widget
+            widget.cfg_connect()
+
+    def cfg_init(self):
+        if set(self.ext_names()) != set(self.ext_widgets.keys()):
+            self._init_ext_widgets()
+        for widget in self.ext_widgets.values():
+            widget.cfg_init()
+
+    def cfg_connect(self):
+        self._update()
+
+    def _update(self):
+        """Updates which extension widgets are visible."""
+        for w in self.ext_widgets.values():
+            w.setVisible(True)

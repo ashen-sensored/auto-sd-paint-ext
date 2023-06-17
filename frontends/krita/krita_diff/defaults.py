@@ -89,6 +89,7 @@ class Defaults:
     txt2img_highres: bool = False
     txt2img_script: str = "None"
     txt2img_script_list: List[str] = field(default_factory=lambda: [ERROR_MSG])
+    txt2img_alwayson_script_list: List[str] = field(default_factory=lambda: [ERROR_MSG])
     # TODO: Seed variation
 
     img2img_prompt: str = ""
@@ -102,6 +103,7 @@ class Defaults:
     img2img_color_correct: bool = False
     img2img_script: str = "None"
     img2img_script_list: List[str] = field(default_factory=lambda: [ERROR_MSG])
+    img2img_alwayson_script_list: List[str] = field(default_factory=lambda: [ERROR_MSG])
 
     inpaint_prompt: str = ""
     inpaint_negative_prompt: str = ""
@@ -118,11 +120,13 @@ class Defaults:
         default_factory=lambda: ["blur", "preserve", "latent noise", "latent empty"]
     )
     inpaint_fill: str = "preserve"
+    inpaint_mask_blur: int = 4
     # inpaint_full_res: bool = False
     # inpaint_full_res_padding: int = 32
     inpaint_color_correct: bool = False
     inpaint_script: str = "None"
     inpaint_script_list: List[str] = field(default_factory=lambda: [ERROR_MSG])
+    inpaint_alwayson_script_list: List[str] = field(default_factory=lambda: [ERROR_MSG])
     inpaint_mask_weight: float = 1.0
 
     upscale_upscaler_name: str = "None"

@@ -8,7 +8,7 @@ from ..widgets import (
     QSpinBoxLayout,
     StatusBar,
 )
-from .extension import ExtSectionLayout
+from .extension import SelectedScriptSectionLayout, AlwaysOnScriptSectionLayout
 
 
 class SDImgPageBase(QWidget):
@@ -43,7 +43,7 @@ class SDImgPageBase(QWidget):
             max=9999.0,
         )
 
-        self.ext_layout = ExtSectionLayout(cfg_prefix)
+        self.ext_layout = SelectedScriptSectionLayout(cfg_prefix)
 
         inline_layout = QHBoxLayout()
         inline_layout.addLayout(self.steps_layout)
@@ -58,6 +58,9 @@ class SDImgPageBase(QWidget):
         layout.addLayout(self.seed_layout)
         layout.addLayout(self.sampler_layout)
         layout.addLayout(inline_layout)
+        
+        self.always_on_scripts_layout = AlwaysOnScriptSectionLayout(cfg_prefix)
+        layout.addLayout(self.always_on_scripts_layout)
 
         self.setLayout(layout)
 
@@ -71,6 +74,7 @@ class SDImgPageBase(QWidget):
 
     def cfg_init(self):
         self.ext_layout.cfg_init()
+        self.always_on_scripts_layout.cfg_init()
         self.prompt_layout.cfg_init()
         self.seed_layout.cfg_init()
         self.sampler_layout.cfg_init()
@@ -80,6 +84,7 @@ class SDImgPageBase(QWidget):
 
     def cfg_connect(self):
         self.ext_layout.cfg_connect()
+        self.always_on_scripts_layout.cfg_connect()
         self.prompt_layout.cfg_connect()
         self.seed_layout.cfg_connect()
         self.sampler_layout.cfg_connect()

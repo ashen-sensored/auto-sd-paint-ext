@@ -20,7 +20,7 @@ from .defaults import (
     STATE_URLERROR,
     THREADED,
 )
-from .utils import bytewise_xor, fix_prompt, get_ext_args, get_ext_key, img_to_b64
+from .utils import bytewise_xor, fix_prompt, get_ext_args, get_alwayson_ext_args, get_ext_key, img_to_b64
 
 # NOTE: backend queues up responses, so no explicit need to block multiple requests
 # except to prevent user from spamming themselves
@@ -268,15 +268,19 @@ class Client(QObject):
             self.cfg.set("img2img_sampler_list", obj["samplers_img2img"])
             self.cfg.set("inpaint_sampler_list", obj["samplers_img2img"])
             self.cfg.set("txt2img_script_list", list(obj["scripts_txt2img"].keys()))
+            self.cfg.set("txt2img_alwayson_script_list", list(obj["scripts_alwayson_txt2img"].keys()))
             self.cfg.set("img2img_script_list", list(obj["scripts_img2img"].keys()))
+            self.cfg.set("img2img_alwayson_script_list", list(obj["scripts_alwayson_img2img"].keys()))
             self.cfg.set("inpaint_script_list", list(obj["scripts_img2img"].keys()))
+            self.cfg.set("inpaint_alwayson_script_list", list(obj["scripts_alwayson_img2img"].keys()))
             self.cfg.set("face_restorer_model_list", obj["face_restorers"])
             self.cfg.set("sd_model_list", obj["sd_models"])
             self.cfg.set("sd_vae_list", ["Automatic", "None"] + obj["sd_vaes"])
 
             # extension script cfg
             obj["scripts_inpaint"] = obj["scripts_img2img"]
-            for ext_type in {"scripts_txt2img", "scripts_img2img", "scripts_inpaint"}:
+            obj['scripts_alwayson_inpaint'] = obj['scripts_alwayson_img2img']
+            for ext_type in ["scripts_txt2img", "scripts_img2img", "scripts_inpaint", "scripts_alwayson_txt2img", "scripts_alwayson_img2img", "scripts_alwayson_inpaint"]:
                 metadata: Dict[str, List[dict]] = obj[ext_type]
                 for ext_name, ext_meta in metadata.items():
                     old_val = self.ext_cfg(get_ext_key(ext_type, ext_name))
@@ -328,8 +332,11 @@ class Client(QObject):
                 if not self.cfg("img2img_seed", str).strip() == ""
                 else -1
             )
+            alwayson_ext_names = self.cfg("img2img_alwayson_script_list", str)
+            alwayson_ext_args = get_alwayson_ext_args(self.ext_cfg, "scripts_alwayson_img2img",alwayson_ext_names)
             ext_name = self.cfg("img2img_script", str)
             ext_args = get_ext_args(self.ext_cfg, "scripts_img2img", ext_name)
+            combined_ext_args = alwayson_ext_args + ext_args
             params.update(self.common_params(has_selection))
             params.update(
                 prompt=fix_prompt(self.cfg("img2img_prompt", str)),
@@ -340,7 +347,7 @@ class Client(QObject):
                 denoising_strength=self.cfg("img2img_denoising_strength", float),
                 color_correct=self.cfg("img2img_color_correct", bool),
                 script=ext_name,
-                script_args=ext_args,
+                script_args=combined_ext_args,
                 seed=seed,
             )
 
@@ -360,8 +367,11 @@ class Client(QObject):
             fill = self.cfg("inpaint_fill_list", "QStringList").index(
                 self.cfg("inpaint_fill", str)
             )
+            alwayson_ext_names = self.cfg("inpaint_alwayson_script_list", str)
+            alwayson_ext_args = get_alwayson_ext_args(self.ext_cfg, "scripts_alwayson_inpaint",alwayson_ext_names)
             ext_name = self.cfg("inpaint_script", str)
             ext_args = get_ext_args(self.ext_cfg, "scripts_inpaint", ext_name)
+            combined_ext_args = alwayson_ext_args + ext_args
             params.update(self.common_params(has_selection))
             params.update(
                 prompt=fix_prompt(self.cfg("inpaint_prompt", str)),
@@ -372,10 +382,10 @@ class Client(QObject):
                 denoising_strength=self.cfg("inpaint_denoising_strength", float),
                 color_correct=self.cfg("inpaint_color_correct", bool),
                 script=ext_name,
-                script_args=ext_args,
+                script_args=combined_ext_args,
                 seed=seed,
                 invert_mask=self.cfg("inpaint_invert_mask", bool),
-                # mask_blur=self.cfg("inpaint_mask_blur", int),
+                mask_blur=self.cfg("inpaint_mask_blur", int),
                 inpainting_fill=fill,
                 # inpaint_full_res=self.cfg("inpaint_full_res", bool),
                 # inpaint_full_res_padding=self.cfg("inpaint_full_res_padding", int),

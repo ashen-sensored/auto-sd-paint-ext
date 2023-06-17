@@ -1,8 +1,17 @@
-from krita import QHBoxLayout, QPushButton
+from krita import QHBoxLayout, QPushButton, QGroupBox, QVBoxLayout
 
 from ..script import script
-from ..widgets import QCheckBox, QComboBoxLayout, QSpinBoxLayout, TipsLayout
+from ..widgets import (
+    QCheckBox,
+    QComboBoxLayout,
+    QSpinBoxLayout,
+    TipsLayout,
+    FlowLayout,
+    CollapsibleBoxLayout,
+)
 from .img_base import SDImgPageBase
+
+from PyQt5 import QtCore
 
 
 class InpaintPage(SDImgPageBase):
@@ -13,9 +22,9 @@ class InpaintPage(SDImgPageBase):
         self.layout.addLayout(self.denoising_strength_layout)
 
         self.invert_mask = QCheckBox(script.cfg, "inpaint_invert_mask", "Invert mask")
-        # self.mask_blur_layout = QSpinBoxLayout(
-        #     script.cfg, "inpaint_mask_blur", "Mask blur (px):", min=0, max=9999, step=1
-        # )
+        self.mask_blur_layout = QSpinBoxLayout(
+            script.cfg, "inpaint_mask_blur", "Mask blur (px):", min=0, max=9999, step=1
+        )
         self.inpaint_mask_weight = QSpinBoxLayout(
             script.cfg, "inpaint_mask_weight", "Mask weight:", step=0.01
         )
@@ -23,7 +32,7 @@ class InpaintPage(SDImgPageBase):
         inline1 = QHBoxLayout()
         inline1.addWidget(self.invert_mask)
         inline1.addLayout(self.inpaint_mask_weight)
-        # inline1.addLayout(self.mask_blur_layout)
+        inline1.addLayout(self.mask_blur_layout)
 
         self.fill_layout = QComboBoxLayout(
             script.cfg, "inpaint_fill_list", "inpaint_fill", label="Inpaint fill:"
@@ -63,11 +72,28 @@ class InpaintPage(SDImgPageBase):
         self.layout.addWidget(self.btn)
         self.layout.addLayout(self.tips2)
         self.layout.addLayout(self.tips)
+        for i in range(12):
+            category_box = CollapsibleBoxLayout(str(i))
+            flow = FlowLayout(parent=None)
+
+            for i in range(12):
+                self.create_button(flow)
+
+            category_box.setContentLayout(flow)
+            #    self.collapse_layout.setAlignment(QtCore.Qt.AlignTop)
+            self.layout.addLayout(category_box)
+
         self.layout.addStretch()
+
+    def create_button(self, flow):
+        btn = QPushButton()
+        btn.setFixedSize(34, 34)
+        btn.setIconSize(btn.rect().size())
+        flow.addWidget(btn)
 
     def cfg_init(self):
         super(InpaintPage, self).cfg_init()
-        # self.mask_blur_layout.cfg_init()
+        self.mask_blur_layout.cfg_init()
         self.fill_layout.cfg_init()
         self.inpaint_mask_weight.cfg_init()
         # self.full_res_padding_layout.cfg_init()
@@ -78,7 +104,7 @@ class InpaintPage(SDImgPageBase):
 
     def cfg_connect(self):
         super(InpaintPage, self).cfg_connect()
-        # self.mask_blur_layout.cfg_connect()
+        self.mask_blur_layout.cfg_connect()
         self.fill_layout.cfg_connect()
         self.inpaint_mask_weight.cfg_connect()
         # self.full_res_padding_layout.cfg_connect()
